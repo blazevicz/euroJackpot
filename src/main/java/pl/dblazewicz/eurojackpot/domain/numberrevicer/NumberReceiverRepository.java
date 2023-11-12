@@ -1,17 +1,25 @@
 package pl.dblazewicz.eurojackpot.domain.numberrevicer;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.lang.NonNull;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface NumberReceiverRepository extends MongoRepository<Ticket, Long> {
+@AllArgsConstructor
+public class NumberReceiverRepository implements NumberReceiverDAO {
+    private final TicketMapper ticketMapper;
+    private final TicketMongoRepository ticketMongoRepository;
 
-    @NonNull
-    Ticket save(Ticket ticket);
+    @Override
+    public TicketDTO save(Ticket ticket) {
+        return ticketMapper.mapToDTO(ticket);
+    }
 
-    List<Ticket> findAllByLocalDateTime(LocalDateTime localDateTime);
+    @Override
+    public List<TicketDTO> findAllByLocalDateTime(LocalDateTime localDateTime) {
+        List<Ticket> allByLocalDateTime = ticketMongoRepository.findAllByLocalDateTime(localDateTime);
+        return allByLocalDateTime.stream().map(ticketMapper::mapToDTO).toList();
+    }
 }

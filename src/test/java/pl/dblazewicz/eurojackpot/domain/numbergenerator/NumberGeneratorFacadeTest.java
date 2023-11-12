@@ -39,5 +39,4 @@ class NumberGeneratorFacadeTest {
         Assertions.assertNotNull(draw.drawResultWhereMaxNumber12());
         Assertions.assertNotNull(draw.drawResultWhereMaxNumber50());
     }
-
 }

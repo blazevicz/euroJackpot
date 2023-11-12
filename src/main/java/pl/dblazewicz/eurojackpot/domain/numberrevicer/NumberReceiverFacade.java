@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -16,29 +17,26 @@ public class NumberReceiverFacade {
     private final NumberValidator numberValidator;
     private final NumberReceiverRepository numberReceiverRepository;
     private final TicketMapper ticketMapper;
+    private final Clock clock;
 
-    public TicketDTO receiveNumbersAndCreateTicket(Set<Integer> mainNumbers, Set<Integer> bonusNumbers) throws NumbersOutOfRangeException {
+    public TicketDTO receiveNumbersAndCreateTicket(
+            Set<Integer> mainNumbers,
+            Set<Integer> bonusNumbers) throws NumbersOutOfRangeException {
+
         numberValidator.numbersAreCorrectly(mainNumbers, bonusNumbers);
+        LocalDateTime currentTime = LocalDateTime.now();
 
         Ticket ticket = Ticket.builder()
                 .mainNumbers(mainNumbers)
                 .bonusNumbers(bonusNumbers)
-                .localDateTime(LocalDateTime.now())
+                .localDateTime(currentTime)
                 .ticketId(UUID.randomUUID())
                 .build();
 
-        Ticket savedTicket = numberReceiverRepository.save(ticket);
-
-        return TicketDTO.builder()
-                .mainNumbers(mainNumbers)
-                .bonusNumbers(bonusNumbers)
-                .localDateTime(LocalDateTime.now())
-                .ticketId(UUID.randomUUID())
-                .build();
+        return numberReceiverRepository.save(ticket);
     }
 
     public List<TicketDTO> usersTickets(LocalDateTime localDateTime) {
-        List<Ticket> allByLocalDateTime = numberReceiverRepository.findAllByLocalDateTime(localDateTime);
-        return allByLocalDateTime.stream().map(ticketMapper::mapToDTO).toList();
+        return numberReceiverRepository.findAllByLocalDateTime(localDateTime);
     }
 }
