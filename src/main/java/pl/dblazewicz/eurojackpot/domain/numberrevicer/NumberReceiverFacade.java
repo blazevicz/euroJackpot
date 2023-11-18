@@ -24,7 +24,7 @@ public class NumberReceiverFacade {
             Set<Integer> bonusNumbers) throws NumbersOutOfRangeException {
 
         numberValidator.numbersAreCorrectly(mainNumbers, bonusNumbers);
-        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime currentTime = LocalDateTime.now(clock);
 
         Ticket ticket = Ticket.builder()
                 .mainNumbers(mainNumbers)

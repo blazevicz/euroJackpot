@@ -9,14 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -35,10 +34,10 @@ class NumberReceiverFacadeTest {
 
     @BeforeEach
     void setUp() {
-        Clock fixedClock = Clock.fixed(
-                Instant.parse("2023-11-05T18:22:21.131225Z"),
-                ZoneId.of("UTC")
-        );
+        var fixedClock = Clock.fixed(
+                LocalDateTime.of(2023, 1, 1, 12, 0, 0, 0)
+                        .toInstant(ZoneOffset.UTC),
+                ZoneId.systemDefault());
 
         numberReceiverFacade = new NumberReceiverFacade(
                 numberValidator,
@@ -61,7 +60,7 @@ class NumberReceiverFacadeTest {
 
         TicketDTO ticketDTO = numberReceiverFacade.receiveNumbersAndCreateTicket(Set.of(), Set.of());
 
-        assertEquals(ticketDTO.localDateTime(), ticket.localDateTime());
+        Assertions.assertEquals(ticketDTO.localDateTime(), ticket.localDateTime());
     }
 
     @Test
@@ -75,7 +74,6 @@ class NumberReceiverFacadeTest {
                 .build();
         LocalDateTime localDateTime = LocalDateTime.now();
         when(numberReceiverRepository.findAllByLocalDateTime(any())).thenReturn(List.of(ticketDTO));
-        when(ticketMapper.mapToDTO(any())).thenReturn(ticketDTO);
         var tickets = numberReceiverFacade.usersTickets(localDateTime);
         Assertions.assertTrue(tickets.contains(ticketDTO));
     }
@@ -100,6 +98,13 @@ class NumberReceiverFacadeTest {
     void shouldCreateTicketWithMainNumbersBonusNumbersAndTime() throws NumbersOutOfRangeException {
         Set<Integer> mainNumbers = Set.of(1, 2, 3, 4, 5);
         Set<Integer> bonusNumbers = Set.of(1, 2);
+        TicketDTO ticketDTO = TicketDTO.builder()
+                .mainNumbers(mainNumbers)
+                .ticketId(UUID.randomUUID())
+                .bonusNumbers(bonusNumbers)
+                .localDateTime(LocalDateTime.now())
+                .build();
+        when(numberReceiverRepository.save(any())).thenReturn(ticketDTO);
         TicketDTO ticket = numberReceiverFacade.receiveNumbersAndCreateTicket(mainNumbers, bonusNumbers);
         Assertions.assertFalse(ticket.mainNumbers().isEmpty());
         Assertions.assertFalse(ticket.bonusNumbers().isEmpty());
@@ -110,6 +115,13 @@ class NumberReceiverFacadeTest {
     void shouldCreateTicketWithFiveMainNumbers() throws NumbersOutOfRangeException {
         Set<Integer> mainNumbers = Set.of(1, 2, 3, 4, 5);
         Set<Integer> bonusNumbers = Set.of(1, 2);
+        TicketDTO ticketDTO = TicketDTO.builder()
+                .mainNumbers(mainNumbers)
+                .ticketId(UUID.randomUUID())
+                .bonusNumbers(bonusNumbers)
+                .localDateTime(LocalDateTime.now())
+                .build();
+        when(numberReceiverRepository.save(any())).thenReturn(ticketDTO);
         TicketDTO ticket = numberReceiverFacade.receiveNumbersAndCreateTicket(mainNumbers, bonusNumbers);
         Assertions.assertEquals(5, ticket.mainNumbers().size());
     }
@@ -118,6 +130,13 @@ class NumberReceiverFacadeTest {
     void shouldSuccessWhenUserGaveTwoBonusNumbers() throws NumbersOutOfRangeException {
         Set<Integer> mainNumbers = Set.of(1, 2, 3, 4, 5);
         Set<Integer> bonusNumbers = Set.of(1, 2);
+        TicketDTO ticketDTO = TicketDTO.builder()
+                .mainNumbers(mainNumbers)
+                .ticketId(UUID.randomUUID())
+                .bonusNumbers(bonusNumbers)
+                .localDateTime(LocalDateTime.now())
+                .build();
+        when(numberReceiverRepository.save(any())).thenReturn(ticketDTO);
         TicketDTO ticket = numberReceiverFacade.receiveNumbersAndCreateTicket(mainNumbers, bonusNumbers);
         Assertions.assertEquals(2, ticket.bonusNumbers().size());
     }

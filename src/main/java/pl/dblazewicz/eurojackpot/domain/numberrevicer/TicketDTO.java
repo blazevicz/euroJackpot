@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Builder
-public record TicketDTO(
+record TicketDTO(
         UUID ticketId,
         Set<Integer> mainNumbers,
         Set<Integer> bonusNumbers,
