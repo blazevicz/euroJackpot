@@ -14,7 +14,7 @@ public class NumberReceiverRepository implements NumberReceiverDAO {
 
     @Override
     public TicketDTO save(Ticket ticket) {
-        return ticketMapper.mapToDTO(ticket);
+        return ticketMapper.mapToDTO(ticketMongoRepository.save(ticket));
     }
 
     @Override

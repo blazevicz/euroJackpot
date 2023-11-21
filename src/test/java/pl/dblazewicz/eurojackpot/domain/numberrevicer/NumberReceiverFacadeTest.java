@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.dblazewicz.eurojackpot.domain.numbergenerator.NumberGeneratorFacade;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -31,6 +32,8 @@ class NumberReceiverFacadeTest {
     private TicketMapper ticketMapper;
     @Mock
     private Clock clock;
+    @Mock
+    private NumberGeneratorFacade numberGeneratorFacade;
 
     @BeforeEach
     void setUp() {
@@ -43,23 +46,23 @@ class NumberReceiverFacadeTest {
                 numberValidator,
                 numberReceiverRepository,
                 ticketMapper,
-                fixedClock
+                fixedClock,
+                numberGeneratorFacade
         );
     }
 
     @Test
     void shouldSaveWithCorrectDateTime() throws NumbersOutOfRangeException {
+        Set<Integer> mainNumbers = Set.of(1, 2, 3, 4, 5);
+        Set<Integer> bonusNumbers = Set.of(1, 2);
         TicketDTO ticket = TicketDTO.builder()
                 .localDateTime(LocalDateTime.of(2023, 1, 1, 12, 0, 0))
                 .bonusNumbers(Set.of())
                 .mainNumbers(Set.of())
                 .ticketId(UUID.randomUUID())
                 .build();
-
         when(numberReceiverRepository.save(any(Ticket.class))).thenReturn(ticket);
-
-        TicketDTO ticketDTO = numberReceiverFacade.receiveNumbersAndCreateTicket(Set.of(), Set.of());
-
+        TicketDTO ticketDTO = numberReceiverFacade.receiveNumbersAndCreateTicket(mainNumbers, bonusNumbers);
         Assertions.assertEquals(ticketDTO.localDateTime(), ticket.localDateTime());
     }
 
@@ -89,7 +92,8 @@ class NumberReceiverFacadeTest {
     @Test
     void shouldFindMultipleObjectsInDatabase() {
         LocalDateTime localDateTime = LocalDateTime.now();
-        when(numberReceiverRepository.findAllByLocalDateTime(any())).thenReturn(List.of(TicketDTO.builder().build(), TicketDTO.builder().build()));
+        when(numberReceiverRepository.findAllByLocalDateTime(any())).thenReturn(List.of(TicketDTO.builder().build(),
+                TicketDTO.builder().build()));
         var tickets = numberReceiverFacade.usersTickets(localDateTime);
         Assertions.assertEquals(2, tickets.size());
     }
@@ -122,6 +126,7 @@ class NumberReceiverFacadeTest {
                 .localDateTime(LocalDateTime.now())
                 .build();
         when(numberReceiverRepository.save(any())).thenReturn(ticketDTO);
+
         TicketDTO ticket = numberReceiverFacade.receiveNumbersAndCreateTicket(mainNumbers, bonusNumbers);
         Assertions.assertEquals(5, ticket.mainNumbers().size());
     }
