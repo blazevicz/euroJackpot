@@ -3,6 +3,8 @@ package pl.dblazewicz.eurojackpot.domain.numberrevicer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pl.dblazewicz.eurojackpot.domain.numbergenerator.DrawDTO;
+import pl.dblazewicz.eurojackpot.domain.numbergenerator.NumberGeneratorFacade;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -18,11 +20,15 @@ public class NumberReceiverFacade {
     private final NumberReceiverRepository numberReceiverRepository;
     private final TicketMapper ticketMapper;
     private final Clock clock;
+    private final NumberGeneratorFacade numberGeneratorFacade;
+
+    public DrawDTO makeDraw() {
+        return numberGeneratorFacade.draw();
+    }
 
     public TicketDTO receiveNumbersAndCreateTicket(
             Set<Integer> mainNumbers,
             Set<Integer> bonusNumbers) throws NumbersOutOfRangeException {
-
         numberValidator.numbersAreCorrectly(mainNumbers, bonusNumbers);
         LocalDateTime currentTime = LocalDateTime.now(clock);
 

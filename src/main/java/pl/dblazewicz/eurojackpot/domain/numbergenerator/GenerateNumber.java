@@ -17,7 +17,6 @@ class GenerateNumber {
                 .limit(limit)
                 .collect(Collectors.toSet());
     }
-
     private Integer generateRandomNumber(Integer bound) {
         return RANDOM.nextInt(bound);
     }
